@@ -29,12 +29,15 @@ export default function UserRoutes(app) {
         console.log(username, password);
         const currentUser = await dao.findUserByCredentials(username, password);
         console.log(currentUser);
-        if (currentUser) {
-            req.session["currentUser"] = currentUser;
-            res.json(currentUser);
-        } else {
-            res.sendStatus(401);
-        }
+        
+        req.session["currentUser"] = currentUser;
+        res.json(currentUser);
+        // if (currentUser) {
+        //     req.session["currentUser"] = currentUser;
+        //     res.json(currentUser);
+        // } else {
+        //     res.sendStatus(401);
+        // }
     };
     const profile = (req, res) => {
         const currentUser = req.session["currentUser"];
