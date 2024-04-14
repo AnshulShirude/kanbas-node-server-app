@@ -1,6 +1,6 @@
 import * as dao from "./dao.js";
 
-export default function UserRoutes(app) {
+function UserRoutes(app) {
     const createUser = async (req, res) => {
         const user = await dao.createUser(req.body);
         res.json(user);
@@ -10,8 +10,15 @@ export default function UserRoutes(app) {
         res.json(status);
     };
     const findAllUsers = async (req, res) => {
+        const { role } = req.query;
+        if (role) {
+            const users = await dao.findUsersByRole(role);
+            res.json(users);
+            return;
+        }
         const users = await dao.findAllUsers();
         res.json(users);
+        return;
     };
     const findUserById = async (req, res) => {
         const user = await dao.findUserById(req.params.userId);
@@ -19,7 +26,6 @@ export default function UserRoutes(app) {
     };
     const signout = (req, res) => {
         req.session.destroy();
-        // currentUser = null;
         res.sendStatus(200);
     };
 
@@ -29,15 +35,13 @@ export default function UserRoutes(app) {
         console.log(username, password);
         const currentUser = await dao.findUserByCredentials(username, password);
         console.log(currentUser);
-        
-        req.session["currentUser"] = currentUser;
-        res.json(currentUser);
-        // if (currentUser) {
-        //     req.session["currentUser"] = currentUser;
-        //     res.json(currentUser);
-        // } else {
-        //     res.sendStatus(401);
-        // }
+
+        if (currentUser) {
+            req.session["currentUser"] = currentUser;
+            res.json(currentUser);
+        } else {
+            res.sendStatus(401);
+        }
     };
     const profile = (req, res) => {
         const currentUser = req.session["currentUser"];
@@ -50,7 +54,7 @@ export default function UserRoutes(app) {
     const updateUser = async (req, res) => {
         const { userId } = req.params;
         const status = await dao.updateUser(userId, req.body);
-        currentUser = await dao.findUserById(userId);
+        const currentUser = await dao.findUserById(userId);
         res.json(status);
     };
     const signup = async (req, res) => {
@@ -74,3 +78,5 @@ export default function UserRoutes(app) {
     app.post("/api/users/profile", profile);
     app.post("/api/users/signout", signout);
 }
+
+export default UserRoutes;
